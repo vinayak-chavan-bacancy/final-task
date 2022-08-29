@@ -1,23 +1,29 @@
 const mongoose = require("mongoose");
-const Schema = require("mongoose");
 
 const accountSchema = new mongoose.Schema(
   {
-    title: {
+    username: {
       type: String,
       required: true,
       trim: true,
     },
-    status: {
+    emailID: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    accType: {
       type: String,
       require: true,
-      enum: ["Not Started", "In Progress", "Complete"],
+      enum: ["Savings", "Current", "Basic Savings"],
+      trim: true,
+    },
+    balance: {
+      type: String,
+      required: true,
       trim: true,
     },
   },
-  {
-    timestamps: true,
-  }
 );
 
 const account = new mongoose.model("account", accountSchema);
