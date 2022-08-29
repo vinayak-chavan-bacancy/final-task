@@ -49,6 +49,15 @@ const newTransaction = async (req, res) => {
 
 const viewTransaction = async (req, res) => {
   try {
+    
+    const transactionData = await transaction.find();
+
+    // check if any transaction is exist or not
+    if (!transactionData) {
+      return errorResponse(req, res, "Task Not Found", 404);
+    } else {
+      return successResponse(req, res, transactionData, 200);
+    }
 
   } catch (error) {
     return errorResponse(req, res, 'something went wrong', 400, { err: error });
