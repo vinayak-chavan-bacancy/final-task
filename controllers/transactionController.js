@@ -1,58 +1,59 @@
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
-const dotenv = require('dotenv');
+const { v4: uuidv4 } = require('uuid');
 
-const user = require('../models/account');
+const account = require('../models/account');
+const transaction = require('../models/transaction');
 const { successResponse, errorResponse } = require('../utils');
 
-const login = async (req, res) => {
+const addAccount = async (req, res) => {
   try {
-    const emailID = req.body.emailID;
-    const password = req.body.password;
+    const { username, emailID, accType, balance } = req.body;
 
-    // check for email exist or not
-    const userData = await user.findOne({ emailID: emailID });
-    if (!userData) {
-      return errorResponse(req, res, 'Invalid credentials.', 404);
-    }
-
-    // check for the password
-    const isMatch = await bcrypt.compare(password, userData.password);
-    if(!isMatch){
-      return errorResponse(req, res, 'Invalid credentials.', 404);
-    } else {
-
-      // jwt token created
-      let accessToken = userData.getToken({exp: 60*60, secret: process.env.ACCESS_TOKEN_SECRET})
-      await userData.save()
-      return res.status(200).send({ accessToken })
-    }
-  } catch (error) {
-    return errorResponse(req, res, error.message, 400, { err: error });
-  }
-}
-
-const register = async (req, res) => {
-  try {
-      const addinguserRecords = new user(req.body);
-      const emailID = req.body.emailID;
-
-      // check if email id allready exist
-      const userData = await user.findOne({ emailID: emailID });
+    // checking if account allready exist or not 
+    const userData = await account.findOne({ emailID: emailID, accType: accType });
       if (userData) {
-        return errorResponse(req, res, 'email ID allready exist', 400);
+        return errorResponse(req, res, 'you allready have account', 400);
       }
       else {
 
-        // register new user
-        const insert = await addinguserRecords.save();
-        console.log('Registration Successful');
-        return successResponse(req, res, insert, 200);
-      }
-  } catch (e) {
-    return errorResponse(req, res, 'something went wrong', 400, { err: e });
-  }
-}
+        // creating payload
+        const payload = {
+          username,
+          emailID,
+          accNumber: uuidv4(),
+          accType,
+          balance,
+        };
 
-module.exports = { login, register };
+        // insert account payload in database
+        newAccount = new account(payload);
+        const insertAccount = await newAccount.save();
+        console.log('account created successful');
+
+        return successResponse(req, res, insertAccount, 200);
+      }
+
+  } catch (error) {
+    console.log(error.message);
+    return errorResponse(req, res, 'something went wrong', 400, { err: error });
+  }
+};
+
+const newTransaction = async (req, res) => {
+  try {
+
+  } catch (error) {
+    return errorResponse(req, res, "something went wrong", 400, { err: error });
+  }
+};
+
+const viewTransaction = async (req, res) => {
+  try {
+
+  } catch (error) {
+    return errorResponse(req, res, 'something went wrong', 400, { err: error });
+  }
+};
+
+
+module.exports = { addAccount, newTransaction, viewTransaction };
