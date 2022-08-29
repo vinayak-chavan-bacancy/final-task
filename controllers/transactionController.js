@@ -45,6 +45,7 @@ const newTransaction = async (req, res) => {
     const { fromAccountId, toAccountId, amount } = req.body;
 
     try {
+
       // finding sender's account data
       senderData = await account.findOne({ accNumber: fromAccountId });
       if (!senderData) {
@@ -56,8 +57,8 @@ const newTransaction = async (req, res) => {
       if (!receiverData) {
         return errorResponse(req, res, "account not found", 400);
       }
+
     } catch (error) {
-      console.log('first' + error.message);
       return errorResponse(req, res, "something went wrong", 400, {
         err: error,
       });
@@ -65,12 +66,7 @@ const newTransaction = async (req, res) => {
 
     // checking that transaction not happening in same user's accounts
     if (senderData.emailID == receiverData.emailID) {
-      return errorResponse(
-        req,
-        res,
-        "transaction not possible within same user's account",
-        400
-      );
+      return errorResponse(req, res, "transaction not possible within same user's account", 400);
     }
 
     //checking sender have sufficinent balance for the transaction or not
@@ -80,8 +76,7 @@ const newTransaction = async (req, res) => {
 
     // checking for basic savings account limit shold not esceeded
     if (
-      receiverData.accType == "Basic Savings" &&
-      receiverData.balance + amount > 50000
+      receiverData.accType == "Basic Savings" && receiverData.balance + amount > 50000
     ) {
       return errorResponse(req, res, "basic savings account limit exceeded", 400);
     }
@@ -115,14 +110,14 @@ const newTransaction = async (req, res) => {
 
     // saving data into transaction table
     const transactionPayload = {  
-          fromAccountId,
-          toAccountId,
-          amount
+      fromAccountId,
+      toAccountId,
+      amount
     };
 
-        // insert account payload in database
-        const newTransaction = new transaction(transactionPayload);
-        const insertDetails = await newTransaction.save();
+    // insert account payload in database
+    const newTransaction = new transaction(transactionPayload);
+    const insertDetails = await newTransaction.save();
 
     return successResponse(
       req,
@@ -134,6 +129,7 @@ const newTransaction = async (req, res) => {
       },
       200
     );
+    
   } catch (error) {
     console.log('third' + error.message);
     return errorResponse(req, res, "something went wrong", 400, { err: error });
